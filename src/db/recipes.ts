@@ -161,3 +161,79 @@ export async function listRecipesByCategory(
   );
   return rows.map((r) => ({ ...r, isFavorite: r.isFavorite === 1 }));
 }
+
+export type RecipeListItem = {
+  id: number;
+  title: string;
+  servings: number;
+  isFavorite: boolean;
+  categoryName: string;
+};
+
+type ListRow = Omit<RecipeListItem, 'isFavorite'> & { isFavorite: number };
+
+const toListItem = (r: ListRow): RecipeListItem => ({ ...r, isFavorite: r.isFavorite === 1 });
+
+export async function setFavorite(db: SQLiteDatabase, id: number, favorite: boolean): Promise<void> {
+  await db.runAsync('UPDATE recipes SET isFavorite = ? WHERE id = ?', favorite ? 1 : 0, id);
+}
+
+// Newest first. Scaled TEMP copies are left out.
+export async function listRecentRecipes(db: SQLiteDatabase, limit = 8): Promise<RecipeListItem[]> {
+  const rows = await db.getAllAsync<ListRow>(
+    `SELECT r.id, r.title, r.servings, r.isFavorite, c.name AS categoryName
+     FROM recipes r JOIN categories c ON c.id = r.categoryId
+     WHERE r.isTemp = 0 ORDER BY r.createdAt DESC, r.id DESC LIMIT ?`,
+    limit,
+  );
+  return rows.map(toListItem);
+}
+
+export type SearchOptions = {
+  query?: string;
+  favoritesOnly?: boolean;
+  tags?: string[]; // recipe must have every one of these
+};
+
+const likeEscape = (s: string) => `%${s.replace(/[\\%_]/g, (m) => `\\${m}`)}%`;
+
+// Every word of the query must appear in the title, ingredients, notes, category
+// or tags. Favorites and tag filters narrow the result further.
+export async function searchRecipes(
+  db: SQLiteDatabase,
+  { query = '', favoritesOnly = false, tags = [] }: SearchOptions,
+): Promise<RecipeListItem[]> {
+  const terms = query.trim().split(/\s+/).filter(Boolean).slice(0, 8);
+  const where: string[] = [];
+  const params: (string | number)[] = [];
+
+  for (const term of terms) {
+    const like = likeEscape(term);
+    where.push(`(
+      r.title LIKE ? ESCAPE '\\' OR r.notes LIKE ? ESCAPE '\\' OR c.name LIKE ? ESCAPE '\\'
+      OR EXISTS (SELECT 1 FROM ingredients i WHERE i.recipeId = r.id AND i.rawText LIKE ? ESCAPE '\\')
+      OR EXISTS (SELECT 1 FROM recipe_tags rt JOIN tags t ON t.id = rt.tagId
+                 WHERE rt.recipeId = r.id AND t.name LIKE ? ESCAPE '\\')
+    )`);
+    params.push(like, like, like, like, like);
+  }
+  if (favoritesOnly) where.push('r.isFavorite = 1');
+  for (const tag of tags) {
+    where.push(`EXISTS (SELECT 1 FROM recipe_tags rt JOIN tags t ON t.id = rt.tagId
+                        WHERE rt.recipeId = r.id AND t.name = ? COLLATE NOCASE)`);
+    params.push(tag);
+  }
+
+  // Title matches first, then alphabetical.
+  const titleLike = terms.length > 0 ? likeEscape(terms[0]) : '%';
+  const rows = await db.getAllAsync<ListRow>(
+    `SELECT r.id, r.title, r.servings, r.isFavorite, c.name AS categoryName
+     FROM recipes r JOIN categories c ON c.id = r.categoryId
+     ${where.length ? `WHERE ${where.join(' AND ')}` : ''}
+     ORDER BY CASE WHEN r.title LIKE ? ESCAPE '\\' THEN 0 ELSE 1 END, r.title COLLATE NOCASE
+     LIMIT 200`,
+    ...params,
+    titleLike,
+  );
+  return rows.map(toListItem);
+}

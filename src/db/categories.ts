@@ -40,3 +40,15 @@ export function getCategory(db: SQLiteDatabase, id: number): Promise<Category | 
     id,
   );
 }
+
+export type CategoryWithCount = Category & { recipeCount: number };
+
+// Scaled TEMP copies are not counted.
+export function listCategoriesWithCounts(db: SQLiteDatabase): Promise<CategoryWithCount[]> {
+  return db.getAllAsync<CategoryWithCount>(
+    `SELECT c.id AS id, c.name AS name, c.sortOrder AS sortOrder, c.isDefault AS isDefault,
+            COUNT(r.id) AS recipeCount
+     FROM categories c LEFT JOIN recipes r ON r.categoryId = c.id AND r.isTemp = 0
+     GROUP BY c.id ORDER BY c.sortOrder, c.id`,
+  );
+}

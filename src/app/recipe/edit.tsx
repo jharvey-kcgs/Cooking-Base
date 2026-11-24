@@ -7,6 +7,7 @@ import { AppButton } from '@/components/AppButton';
 import { ThemedInput } from '@/components/ThemedInput';
 import { listCategories, type Category } from '@/db/categories';
 import { createRecipe, getRecipe, updateRecipe } from '@/db/recipes';
+import { getRecipeTags, listTags, parseTagInput, setRecipeTags, type TagCount } from '@/db/tags';
 import { parseIngredient } from '@/services/parseIngredient';
 import { takeImportDraft } from '@/state/importDraft';
 import { useTheme } from '@/theme/ThemeProvider';
@@ -32,6 +33,8 @@ export default function EditRecipeScreen() {
   const [steps, setSteps] = useState<string[]>(['']);
   const [notes, setNotes] = useState('');
   const [sourceUrl, setSourceUrl] = useState('');
+  const [tagText, setTagText] = useState('');
+  const [knownTags, setKnownTags] = useState<TagCount[]>([]);
 
   // Load categories, then fill the form from the saved recipe (edit) or an import (add).
   useEffect(() => {
@@ -40,6 +43,9 @@ export default function EditRecipeScreen() {
       const cats = await listCategories(db);
       if (!active) return;
       setCategories(cats);
+      const existingTags = await listTags(db);
+      if (!active) return;
+      setKnownTags(existingTags);
 
       if (editingId !== null) {
         const recipe = await getRecipe(db, editingId);
@@ -51,6 +57,9 @@ export default function EditRecipeScreen() {
         setSteps(recipe.instructions.length ? recipe.instructions : ['']);
         setNotes(recipe.notes);
         setSourceUrl(recipe.sourceUrl ?? '');
+        const savedTags = await getRecipeTags(db, editingId);
+        if (!active) return;
+        setTagText(savedTags.join(', '));
       } else {
         const draft = takeImportDraft();
         if (draft) {
@@ -98,9 +107,11 @@ export default function EditRecipeScreen() {
 
       if (editingId !== null) {
         await updateRecipe(db, editingId, input);
+        await setRecipeTags(db, editingId, parseTagInput(tagText));
         router.back(); // the recipe screen reloads when it regains focus
       } else {
         const newId = await createRecipe(db, input);
+        await setRecipeTags(db, newId, parseTagInput(tagText));
         router.dismissAll(); // back to the drawer, then open the new recipe
         router.push(`/recipe/${newId}`);
       }
@@ -202,6 +213,45 @@ export default function EditRecipeScreen() {
         </View>
       ))}
       <AppButton variant="secondary" label="Add step" onPress={() => setSteps([...steps, ''])} />
+
+      {label('TAGS')}
+      <ThemedInput
+        value={tagText}
+        onChangeText={setTagText}
+        placeholder="Separate with commas, e.g. quick, dinner"
+        autoCapitalize="none"
+        autoCorrect={false}
+      />
+      {knownTags.length > 0 ? (
+        <View style={styles.chips}>
+          {knownTags.map((t) => {
+            const current = parseTagInput(tagText);
+            const selected = current.some((c) => c.toLowerCase() === t.name.toLowerCase());
+            return (
+              <Pressable
+                key={t.id}
+                onPress={() =>
+                  setTagText(
+                    (selected
+                      ? current.filter((c) => c.toLowerCase() !== t.name.toLowerCase())
+                      : [...current, t.name]
+                    ).join(', '),
+                  )
+                }
+                style={[
+                  styles.chip,
+                  {
+                    backgroundColor: selected ? colors.primary : colors.surface,
+                    borderColor: selected ? colors.primary : colors.border,
+                  },
+                ]}
+              >
+                <Text style={{ color: selected ? colors.onPrimary : colors.text }}>{t.name}</Text>
+              </Pressable>
+            );
+          })}
+        </View>
+      ) : null}
 
       {label('NOTES')}
       <ThemedInput

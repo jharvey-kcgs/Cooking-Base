@@ -5,7 +5,8 @@ import { useSQLiteContext } from 'expo-sqlite';
 
 import { AppButton } from '@/components/AppButton';
 import { getCategory } from '@/db/categories';
-import { createRecipe, deleteRecipe, getRecipe } from '@/db/recipes';
+import { createRecipe, deleteRecipe, getRecipe, setFavorite } from '@/db/recipes';
+import { getRecipeTags } from '@/db/tags';
 import { getUnits } from '@/db/settings';
 import {
   MAX_SERVINGS,
@@ -26,6 +27,7 @@ export default function RecipeScreen() {
   const [recipe, setRecipe] = useState<Recipe | null>(null);
   const [categoryName, setCategoryName] = useState('');
   const [loaded, setLoaded] = useState(false);
+  const [tags, setTags] = useState<string[]>([]);
   const [units, setUnits] = useState<UnitSystem>('standard');
   const [servings, setServings] = useState(4);
   const [saving, setSaving] = useState(false);
@@ -38,9 +40,11 @@ export default function RecipeScreen() {
         const found = await getRecipe(db, recipeId);
         const category = found ? await getCategory(db, found.categoryId) : null;
         const savedUnits = await getUnits(db);
+        const savedTags = found ? await getRecipeTags(db, found.id) : [];
         if (!active) return;
         setRecipe(found);
         setUnits(savedUnits);
+        setTags(savedTags);
         // Reset the temporary scale whenever the saved recipe (re)loads.
         setServings(found?.servings ?? 4);
         setCategoryName(category?.name ?? '');
@@ -65,6 +69,13 @@ export default function RecipeScreen() {
         },
       },
     ]);
+  };
+
+  const toggleFavorite = () => {
+    if (!recipe) return;
+    const next = !recipe.isFavorite;
+    setRecipe({ ...recipe, isFavorite: next });
+    void setFavorite(db, recipe.id, next);
   };
 
   const saveScaledCopy = async () => {
@@ -119,12 +130,21 @@ export default function RecipeScreen() {
         options={{
           title: '',
           headerRight: () => (
-            <Pressable
-              onPress={() => router.push({ pathname: '/recipe/edit', params: { id: String(recipe.id) } })}
-              hitSlop={10}
-            >
-              <Text style={{ color: colors.primary, fontSize: 17, fontWeight: '600' }}>Edit</Text>
-            </Pressable>
+            <View style={styles.headerButtons}>
+              <Pressable
+                onPress={toggleFavorite}
+                hitSlop={10}
+                accessibilityLabel={recipe.isFavorite ? 'Remove from favorites' : 'Add to favorites'}
+              >
+                <Text style={{ color: colors.primary, fontSize: 24 }}>{recipe.isFavorite ? '♥' : '♡'}</Text>
+              </Pressable>
+              <Pressable
+                onPress={() => router.push({ pathname: '/recipe/edit', params: { id: String(recipe.id) } })}
+                hitSlop={10}
+              >
+                <Text style={{ color: colors.primary, fontSize: 17, fontWeight: '600' }}>Edit</Text>
+              </Pressable>
+            </View>
           ),
         }}
       />
@@ -133,6 +153,16 @@ export default function RecipeScreen() {
       <Text style={[styles.meta, { color: colors.textMuted }]}>
         {[categoryName, recipe.isTemp ? 'TEMP copy' : ''].filter(Boolean).join(' · ')}
       </Text>
+
+      {tags.length > 0 ? (
+        <View style={styles.tagRow}>
+          {tags.map((t) => (
+            <View key={t} style={[styles.tag, { borderColor: colors.border, backgroundColor: colors.surface }]}>
+              <Text style={{ color: colors.textMuted, fontSize: 13 }}>{t}</Text>
+            </View>
+          ))}
+        </View>
+      ) : null}
 
       <View style={[styles.stepper, { backgroundColor: colors.surface, borderColor: colors.border }]}>
         <Text style={[styles.stepperLabel, { color: colors.text }]}>Servings</Text>
@@ -231,6 +261,9 @@ const styles = StyleSheet.create({
   stepNumber: { fontSize: 16, fontWeight: '700', width: 18, lineHeight: 24 },
   stepText: { flex: 1 },
   delete: { marginTop: 36 },
+  headerButtons: { flexDirection: 'row', alignItems: 'center', gap: 18 },
+  tagRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginTop: 10 },
+  tag: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 14, borderWidth: StyleSheet.hairlineWidth },
   deleteGap: { marginTop: 12 },
   stepper: { flexDirection: 'row', alignItems: 'center', borderWidth: StyleSheet.hairlineWidth, borderRadius: 12, paddingVertical: 10, paddingHorizontal: 14, marginTop: 16 },
   stepperLabel: { flex: 1, fontSize: 16, fontWeight: '600' },

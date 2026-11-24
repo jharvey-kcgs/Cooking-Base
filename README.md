@@ -12,12 +12,14 @@ there are no accounts, no cloud, and no analytics.
 - Add, edit, and delete recipes: title, category, servings, ingredients, instructions, notes, source link
 - Import a single recipe from a web link, a Google Doc link, or pasted text
 - Import a whole cookbook from one Google Doc or pasted text (sections map to categories, duplicates are skipped)
+- Home screen with search (title, ingredients, notes, category, tags), Favorites and tag filter chips, recently added, and category tiles
+- Favorites and tags
+- Servings scaler (temporary, with "Save scaled copy" as a TEMP recipe) and Metric/Standard units (display only; dry ingredients convert to grams)
 - Light and dark themes
 - Data screen: export a JSON backup, restore from a backup, clear TEMP recipes, delete all recipes
 - FAQ and About screens
 
-Planned: servings scaler, Metric/Standard units, favorites, tags and search, Home screen,
-cook mode, share as text, print/PDF, share-to-app from the browser.
+Planned: cook mode, share as text, print/PDF, share-to-app from the browser.
 
 ## Tech stack
 

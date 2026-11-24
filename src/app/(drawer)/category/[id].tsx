@@ -55,10 +55,13 @@ export default function CategoryScreen() {
               { backgroundColor: colors.surface, borderColor: colors.border, opacity: pressed ? 0.8 : 1 },
             ]}
           >
-            <Text style={[styles.title, { color: colors.text }]} numberOfLines={2}>
-              {item.title}
-            </Text>
-            <Text style={[styles.meta, { color: colors.textMuted }]}>Serves {item.servings}</Text>
+            <View style={styles.rowText}>
+              <Text style={[styles.title, { color: colors.text }]} numberOfLines={2}>
+                {item.title}
+              </Text>
+              <Text style={[styles.meta, { color: colors.textMuted }]}>Serves {item.servings}</Text>
+            </View>
+            {item.isFavorite ? <Text style={[styles.heart, { color: colors.primary }]}>♥</Text> : null}
           </Pressable>
         )}
       />
@@ -71,7 +74,9 @@ const styles = StyleSheet.create({
   container: { flex: 1 },
   list: { padding: 16, paddingBottom: 110, gap: 10 },
   empty: { textAlign: 'center', marginTop: 48, fontSize: 16 },
-  row: { borderWidth: StyleSheet.hairlineWidth, borderRadius: 12, padding: 14 },
+  row: { flexDirection: 'row', alignItems: 'center', borderWidth: StyleSheet.hairlineWidth, borderRadius: 12, padding: 14 },
+  rowText: { flex: 1 },
+  heart: { fontSize: 20, marginLeft: 10 },
   title: { fontSize: 17, fontWeight: '600' },
   meta: { marginTop: 4, fontSize: 14 },
 });

@@ -29,6 +29,18 @@ const FAQ: { q: string; a: string }[] = [
     a: 'Open the recipe and tap Edit to change its category. To delete, open the recipe and use the Delete button at the bottom.',
   },
   {
+    q: 'How do I search for a recipe?',
+    a: 'Use the search bar on the Home screen. It looks through titles, ingredients, notes, categories, and tags, and every word you type has to match, so "chicken beans" finds recipes with both. Results update as you type.',
+  },
+  {
+    q: 'How do favorites work?',
+    a: 'Tap the heart at the top of a recipe to favorite it. Favorites show a heart in lists, and the ♥ Favorites chip on the Home screen shows only those. You can combine it with a search or tags.',
+  },
+  {
+    q: 'How do I use tags?',
+    a: 'In the edit screen, type tags in the Tags box separated by commas (like "quick, dinner"), or tap an existing tag below it. Tags appear as chips on the Home screen. Tap one to filter, and tap more to narrow further. Tags are not case sensitive.',
+  },
+  {
     q: 'How do I change the number of servings?',
     a: 'Open a recipe and use the + and − buttons next to Servings. The ingredient amounts update right away. This is temporary, so the saved recipe is not changed, and it resets to the original when you leave the recipe. Tap Reset to go back to the original amounts.',
   },
