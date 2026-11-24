@@ -51,19 +51,27 @@ async function insertIngredients(
   }
 }
 
-export async function createRecipe(db: SQLiteDatabase, input: RecipeInput): Promise<number> {
+export type RecipeExtras = { isTemp?: boolean; parentId?: number | null };
+
+export async function createRecipe(
+  db: SQLiteDatabase,
+  input: RecipeInput,
+  extras: RecipeExtras = {},
+): Promise<number> {
   let id = 0;
   const now = Date.now();
   await db.withExclusiveTransactionAsync(async (txn) => {
     const result = await txn.runAsync(
-      `INSERT INTO recipes (categoryId, title, servings, instructions, notes, sourceUrl, createdAt, updatedAt)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+      `INSERT INTO recipes (categoryId, title, servings, instructions, notes, sourceUrl, isTemp, parentId, createdAt, updatedAt)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       input.categoryId,
       input.title,
       input.servings,
       JSON.stringify(input.instructions),
       input.notes,
       input.sourceUrl,
+      extras.isTemp ? 1 : 0,
+      extras.parentId ?? null,
       now,
       now,
     );

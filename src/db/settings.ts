@@ -1,4 +1,5 @@
 import type { SQLiteDatabase } from 'expo-sqlite';
+import { isUnitSystem, type UnitSystem } from '../services/units';
 
 export async function getSetting(db: SQLiteDatabase, key: string): Promise<string | null> {
   const row = await db.getFirstAsync<{ value: string }>(
@@ -14,4 +15,15 @@ export async function setSetting(db: SQLiteDatabase, key: string, value: string)
     key,
     value,
   );
+}
+
+const UNITS_KEY = 'units';
+
+export async function getUnits(db: SQLiteDatabase): Promise<UnitSystem> {
+  const saved = await getSetting(db, UNITS_KEY);
+  return isUnitSystem(saved) ? saved : 'standard';
+}
+
+export function setUnits(db: SQLiteDatabase, units: UnitSystem): Promise<void> {
+  return setSetting(db, UNITS_KEY, units);
 }

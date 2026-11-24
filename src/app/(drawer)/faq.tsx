@@ -29,6 +29,22 @@ const FAQ: { q: string; a: string }[] = [
     a: 'Open the recipe and tap Edit to change its category. To delete, open the recipe and use the Delete button at the bottom.',
   },
   {
+    q: 'How do I change the number of servings?',
+    a: 'Open a recipe and use the + and − buttons next to Servings. The ingredient amounts update right away. This is temporary, so the saved recipe is not changed, and it resets to the original when you leave the recipe. Tap Reset to go back to the original amounts.',
+  },
+  {
+    q: 'How do I keep a scaled version?',
+    a: 'After changing the servings, tap "Save scaled copy". It is saved as a new recipe with (TEMP) added to the title, so you can tell it apart from the original. Delete one like any recipe, or clear them all at once from Data > Delete TEMP recipes.',
+  },
+  {
+    q: 'Why are some ingredients not scaling?',
+    a: 'Lines without a clear amount, like "salt to taste", and ranges like "1-2 cups" are shown exactly as written. Amounts are rounded to practical fractions, so 3 eggs for 1½ times the servings shows as 4½.',
+  },
+  {
+    q: 'How do Metric and Standard units work?',
+    a: 'Choose Standard or Metric under Settings > Units. Recipes are converted for display only, so your saved recipes never change. Cups, spoons, and ounces convert to ml and grams (and back), and oven temperatures in the steps convert between °F and °C. Things like eggs, cloves, or a pinch are left alone. Volume is never converted to weight, since that depends on the ingredient.',
+  },
+  {
     q: 'Where is my data stored?',
     a: 'Only on your phone. There is no account and no cloud copy, which means deleting the app deletes your recipes.',
   },
