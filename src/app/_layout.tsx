@@ -1,7 +1,10 @@
 import { StatusBar } from 'expo-status-bar';
 import { Drawer } from 'expo-router/drawer';
+import { SQLiteProvider } from 'expo-sqlite';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
+import { AppDrawerContent } from '@/components/AppDrawerContent';
+import { DB_NAME, migrateDb } from '@/db/schema';
 import { ThemeProvider, useTheme } from '@/theme/ThemeProvider';
 
 function DrawerNavigator() {
@@ -11,20 +14,20 @@ function DrawerNavigator() {
     <>
       <StatusBar style={mode === 'dark' ? 'light' : 'dark'} />
       <Drawer
+        drawerContent={(props) => <AppDrawerContent {...props} />}
         screenOptions={{
           headerStyle: { backgroundColor: colors.surface },
           headerTintColor: colors.text,
           headerShadowVisible: false,
           drawerStyle: { backgroundColor: colors.background },
-          drawerActiveTintColor: colors.primary,
-          drawerInactiveTintColor: colors.text,
         }}
       >
-        <Drawer.Screen name="index" options={{ drawerLabel: 'Home', title: 'Cooking Base' }} />
-        <Drawer.Screen name="settings" options={{ drawerLabel: 'Settings', title: 'Settings' }} />
-        <Drawer.Screen name="data" options={{ drawerLabel: 'Data', title: 'Data' }} />
-        <Drawer.Screen name="faq" options={{ drawerLabel: 'FAQ', title: 'FAQ' }} />
-        <Drawer.Screen name="about" options={{ drawerLabel: 'About', title: 'About' }} />
+        <Drawer.Screen name="index" options={{ title: 'Cooking Base' }} />
+        <Drawer.Screen name="category/[id]" options={{ title: 'Category' }} />
+        <Drawer.Screen name="settings" options={{ title: 'Settings' }} />
+        <Drawer.Screen name="data" options={{ title: 'Data' }} />
+        <Drawer.Screen name="faq" options={{ title: 'FAQ' }} />
+        <Drawer.Screen name="about" options={{ title: 'About' }} />
       </Drawer>
     </>
   );
@@ -33,9 +36,11 @@ function DrawerNavigator() {
 export default function RootLayout() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <ThemeProvider>
-        <DrawerNavigator />
-      </ThemeProvider>
+      <SQLiteProvider databaseName={DB_NAME} onInit={migrateDb}>
+        <ThemeProvider>
+          <DrawerNavigator />
+        </ThemeProvider>
+      </SQLiteProvider>
     </GestureHandlerRootView>
   );
 }

@@ -1,5 +1,15 @@
-import { createContext, useContext, useMemo, useState, type ReactNode } from 'react';
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+  type ReactNode,
+} from 'react';
+import { useSQLiteContext } from 'expo-sqlite';
 
+import { getSetting, setSetting } from '@/db/settings';
 import { palettes, type Palette, type ThemeMode } from './colors';
 
 type ThemeContextValue = {
@@ -10,14 +20,35 @@ type ThemeContextValue = {
 
 const ThemeContext = createContext<ThemeContextValue | null>(null);
 
-// New users default to Light. The choice is persisted once the
-// settings table exists (see build plan, step 2).
+const THEME_KEY = 'theme';
+
+// Must be rendered inside <SQLiteProvider>. New users default to Light;
+// the choice is saved in the settings table.
 export function ThemeProvider({ children }: { children: ReactNode }) {
-  const [mode, setMode] = useState<ThemeMode>('light');
+  const db = useSQLiteContext();
+  const [mode, setModeState] = useState<ThemeMode>('light');
+
+  useEffect(() => {
+    let active = true;
+    getSetting(db, THEME_KEY).then((saved) => {
+      if (active && (saved === 'light' || saved === 'dark')) setModeState(saved);
+    });
+    return () => {
+      active = false;
+    };
+  }, [db]);
+
+  const setMode = useCallback(
+    (next: ThemeMode) => {
+      setModeState(next);
+      void setSetting(db, THEME_KEY, next);
+    },
+    [db],
+  );
 
   const value = useMemo(
     () => ({ mode, colors: palettes[mode], setMode }),
-    [mode],
+    [mode, setMode],
   );
 
   return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;
