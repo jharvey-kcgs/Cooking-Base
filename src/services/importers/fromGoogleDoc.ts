@@ -6,15 +6,15 @@ export function extractGoogleDocId(input: string): string | null {
   return match ? match[1] : null;
 }
 
-// Reads a Google Doc through its plain-text export. This only works for docs
-// shared as "Anyone with the link"; private docs return a sign-in page instead.
-export async function importFromGoogleDoc(input: string): Promise<ImportedRecipe> {
+// Downloads a Google Doc as plain text through its export link. This only works
+// for docs shared as "Anyone with the link"; private docs return a sign-in page.
+export async function fetchGoogleDocText(
+  input: string,
+): Promise<{ text: string; sourceUrl: string }> {
   const id = extractGoogleDocId(input);
   if (!id) {
     throw new Error("That doesn't look like a Google Doc link (docs.google.com/document/...).");
   }
-
-  const sourceUrl = `https://docs.google.com/document/d/${id}`;
 
   let response: Response;
   try {
@@ -30,5 +30,13 @@ export async function importFromGoogleDoc(input: string): Promise<ImportedRecipe
     );
   }
 
-  return parseRecipeText(await response.text(), sourceUrl);
+  return {
+    text: await response.text(),
+    sourceUrl: `https://docs.google.com/document/d/${id}`,
+  };
+}
+
+export async function importFromGoogleDoc(input: string): Promise<ImportedRecipe> {
+  const { text, sourceUrl } = await fetchGoogleDocText(input);
+  return parseRecipeText(text, sourceUrl);
 }

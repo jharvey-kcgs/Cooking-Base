@@ -126,6 +126,18 @@ export async function getRecipe(db: SQLiteDatabase, id: number): Promise<Recipe 
   };
 }
 
+export function recipeKey(categoryId: number, title: string): string {
+  return `${categoryId}|${title.trim().toLowerCase()}`;
+}
+
+// Every saved recipe as a "categoryId|title" key, used to skip duplicates on import.
+export async function listRecipeKeys(db: SQLiteDatabase): Promise<Set<string>> {
+  const rows = await db.getAllAsync<{ categoryId: number; title: string }>(
+    'SELECT categoryId, title FROM recipes',
+  );
+  return new Set(rows.map((r) => recipeKey(r.categoryId, r.title)));
+}
+
 export async function listRecipesByCategory(
   db: SQLiteDatabase,
   categoryId: number,

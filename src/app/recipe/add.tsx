@@ -35,6 +35,13 @@ export default function AddRecipeScreen() {
       />
       <AppButton variant="secondary" label="Paste text" onPress={() => importVia('text')} />
 
+      <Text style={[styles.section, { color: colors.textMuted }]}>MANY RECIPES AT ONCE</Text>
+      <AppButton
+        variant="secondary"
+        label="Import a whole cookbook"
+        onPress={() => router.push('/recipe/cookbook')}
+      />
+
       <Text style={[styles.hint, { color: colors.textMuted }]}>
         Imported recipes open in the editor first, so you can check them before saving.
       </Text>

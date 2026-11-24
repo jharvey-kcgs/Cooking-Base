@@ -97,7 +97,8 @@ export function parseIngredient(line: string): IngredientInput {
   // Ranges like "1-2 cups" or "2 to 3 cloves" can't be scaled safely.
   if (/^\s*(?:-|–|—|to\b)\s*\d/i.test(qty.rest)) return unparsed;
 
-  let rest = qty.rest.trim();
+  // "1-pound bag" -> "pound bag"
+  let rest = qty.rest.trim().replace(/^-(?=[a-z])/i, '');
   let unit: string | null = null;
 
   const unitMatch = rest.match(UNIT_REGEX);
