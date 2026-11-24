@@ -42,7 +42,7 @@ const FAQ: { q: string; a: string }[] = [
   },
   {
     q: 'How do Metric and Standard units work?',
-    a: 'Choose Standard or Metric under Settings > Units. Recipes are converted for display only, so your saved recipes never change. Cups, spoons, and ounces convert to ml and grams (and back), and oven temperatures in the steps convert between °F and °C. Things like eggs, cloves, or a pinch are left alone. Volume is never converted to weight, since that depends on the ingredient.',
+    a: 'Choose Standard or Metric under Settings > Units. Recipes are converted for display only, so your saved recipes never change. Liquids convert to ml, and dry ingredients the app recognizes (flour, sugar, butter, salt, baking soda, chocolate chips, and more) convert to grams. Ounces and pounds convert to grams, and oven temperatures in the steps convert between °F and °C. Things like eggs, cloves, or a pinch are left alone. If the app does not recognize an ingredient, a cup or spoon amount becomes ml instead of grams.',
   },
   {
     q: 'Where is my data stored?',

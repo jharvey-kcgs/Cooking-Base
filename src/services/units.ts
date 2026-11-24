@@ -1,6 +1,8 @@
 // Display-only unit conversion. Stored recipes are never changed.
-// Volume converts to volume and weight to weight; there is no cup <-> gram
-// conversion because that depends on the ingredient.
+// Volume converts to volume and weight to weight. The one exception: in metric
+// mode, tsp/tbsp/cup of a recognised dry or solid ingredient (flour, sugar,
+// butter...) becomes grams using the table below. Anything not recognised,
+// and all liquids, stay in ml.
 
 export type UnitSystem = 'standard' | 'metric';
 
@@ -17,6 +19,41 @@ const ML_PER: Record<string, number> = {
 };
 
 const G_PER: Record<string, number> = { oz: 28.3495, lb: 453.592, g: 1, kg: 1000 };
+
+// Grams per US cup, first match wins (specific entries before general ones).
+const GRAMS_PER_CUP: [RegExp, number][] = [
+  [/\b(peanut|almond|nut|cashew) butter\b/, 258],
+  [/\bbutter\b|\bmargarine\b/, 227],
+  [/\b(powdered|confectioners?'?|icing) sugar\b/, 120],
+  [/\bbrown sugar\b/, 213],
+  [/\bsugar\b/, 200],
+  [/\b(whole wheat|wheat) flour\b/, 120],
+  [/\bbread flour\b/, 127],
+  [/\bflour\b/, 120],
+  [/\bcocoa\b/, 85],
+  [/\bchocolate (chips?|chunks?)\b|\bchocolate morsels\b/, 170],
+  [/\b(rolled |old[- ]fashioned |quick )?oats\b|\boatmeal\b/, 90],
+  [/\bcornstarch\b|\bcorn starch\b/, 128],
+  [/\bbaking soda\b/, 221],
+  [/\bbaking powder\b/, 230],
+  [/\bsalt\b/, 288],
+  [/\b(cinnamon|nutmeg|paprika|cumin|chili powder|garlic powder|onion powder)\b/, 125],
+  [/\b(shredded|grated) (cheese|cheddar|mozzarella)\b|\bcheddar\b|\bmozzarella\b/, 113],
+  [/\bparmesan\b/, 100],
+  [/\b(bread ?crumbs|panko)\b/, 108],
+  [/\b(walnuts?|pecans?|almonds?|nuts)\b/, 120],
+  [/\braisins?\b/, 150],
+  [/\bhoney\b|\bmaple syrup\b|\bmolasses\b/, 340],
+  [/\b(uncooked |dry )?rice\b/, 185],
+];
+
+const DRY_VOLUME_UNITS = new Set(['tsp', 'tbsp', 'cup']);
+
+function gramsPerCup(name: string): number | null {
+  const n = name.toLowerCase();
+  for (const [re, grams] of GRAMS_PER_CUP) if (re.test(n)) return grams;
+  return null;
+}
 
 const METRIC_UNITS = new Set(['ml', 'l', 'g', 'kg']);
 
@@ -46,8 +83,22 @@ export function niceMetric(v: number): number {
 
 export type Measure = { quantity: number; unit: string | null };
 
-export function convertMeasure(quantity: number, unit: string | null, system: UnitSystem): Measure {
+export function convertMeasure(
+  quantity: number,
+  unit: string | null,
+  system: UnitSystem,
+  name = '',
+): Measure {
   if (unit === null) return { quantity, unit };
+  if (system === 'metric' && DRY_VOLUME_UNITS.has(unit)) {
+    const perCup = gramsPerCup(name);
+    if (perCup !== null) {
+      const g = (quantity * ML_PER[unit] * perCup) / ML_PER.cup;
+      return g >= 1000
+        ? { quantity: Math.round(g / 10) / 100, unit: 'kg' }
+        : { quantity: niceMetric(g), unit: 'g' };
+    }
+  }
   const kind = kindOf(unit);
   if (kind === null) return { quantity, unit };
   const metric = isMetricUnit(unit);

@@ -66,7 +66,7 @@ export function displayIngredient(
   if (ing.quantity === null) return ing.rawText;
 
   const scaled = ing.quantity * ratio;
-  const converted = system ? convertMeasure(scaled, ing.unit, system) : { quantity: scaled, unit: ing.unit };
+  const converted = system ? convertMeasure(scaled, ing.unit, system, ing.name) : { quantity: scaled, unit: ing.unit };
   if (ratio === 1 && converted.unit === ing.unit) return ing.rawText;
 
   const { unit } = converted;
