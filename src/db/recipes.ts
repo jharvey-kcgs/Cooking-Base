@@ -1,5 +1,6 @@
 import type { SQLiteDatabase } from 'expo-sqlite';
 
+import { forgetRecipeViewed, listRecentlyViewedIds } from './recent';
 import type { IngredientInput, Recipe, RecipeInput, RecipeSummary } from '../types/recipe';
 
 type RecipeRow = {
@@ -106,6 +107,7 @@ export async function updateRecipe(
 
 export async function deleteRecipe(db: SQLiteDatabase, id: number): Promise<void> {
   await db.runAsync('DELETE FROM recipes WHERE id = ?', id);
+  await forgetRecipeViewed(db, id);
 }
 
 export async function getRecipe(db: SQLiteDatabase, id: number): Promise<Recipe | null> {
@@ -236,4 +238,21 @@ export async function searchRecipes(
     titleLike,
   );
   return rows.map(toListItem);
+}
+
+// Most recently opened recipes (newest first). Deleted recipes and TEMP copies are skipped.
+export async function listRecentlyViewedRecipes(
+  db: SQLiteDatabase,
+  limit = 3,
+): Promise<RecipeListItem[]> {
+  const ids = await listRecentlyViewedIds(db);
+  if (ids.length === 0) return [];
+  const rows = await db.getAllAsync<ListRow>(
+    `SELECT r.id, r.title, r.servings, r.isFavorite, c.name AS categoryName
+     FROM recipes r JOIN categories c ON c.id = r.categoryId
+     WHERE r.isTemp = 0 AND r.id IN (${ids.map(() => '?').join(',')})`,
+    ...ids,
+  );
+  const byId = new Map(rows.map((r) => [r.id, toListItem(r)]));
+  return ids.flatMap((id) => byId.get(id) ?? []).slice(0, limit);
 }

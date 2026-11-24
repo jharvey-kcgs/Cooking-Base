@@ -33,6 +33,10 @@ const FAQ: { q: string; a: string }[] = [
     a: 'Use the search bar on the Home screen. It looks through titles, ingredients, notes, categories, and tags, and every word you type has to match, so "chicken beans" finds recipes with both. Results update as you type.',
   },
   {
+    q: 'What are Recently viewed and Recently added?',
+    a: 'On the Home screen, Recently viewed shows the last few recipes you opened, and Recently added shows the newest ones. Scaled (TEMP) copies are not included. Restoring a backup or deleting all recipes clears the viewed list.',
+  },
+  {
     q: 'How do favorites work?',
     a: 'Tap the heart at the top of a recipe to favorite it. Favorites show a heart in lists, and the ♥ Favorites chip on the Home screen shows only those. You can combine it with a search or tags.',
   },

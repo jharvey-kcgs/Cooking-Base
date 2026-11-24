@@ -6,6 +6,7 @@ import { useSQLiteContext } from 'expo-sqlite';
 import { AppButton } from '@/components/AppButton';
 import { getCategory } from '@/db/categories';
 import { createRecipe, deleteRecipe, getRecipe, setFavorite } from '@/db/recipes';
+import { recordRecipeViewed } from '@/db/recent';
 import { getRecipeTags } from '@/db/tags';
 import { getUnits } from '@/db/settings';
 import {
@@ -41,6 +42,7 @@ export default function RecipeScreen() {
         const category = found ? await getCategory(db, found.categoryId) : null;
         const savedUnits = await getUnits(db);
         const savedTags = found ? await getRecipeTags(db, found.id) : [];
+        if (found) await recordRecipeViewed(db, found.id);
         if (!active) return;
         setRecipe(found);
         setUnits(savedUnits);

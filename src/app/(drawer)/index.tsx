@@ -9,11 +9,14 @@ import { ThemedInput } from '@/components/ThemedInput';
 import { listCategoriesWithCounts, type CategoryWithCount } from '@/db/categories';
 import {
   listRecentRecipes,
+  listRecentlyViewedRecipes,
   searchRecipes,
   type RecipeListItem,
 } from '@/db/recipes';
 import { listTags, type TagCount } from '@/db/tags';
 import { useTheme } from '@/theme/ThemeProvider';
+
+const RECENT_LIMIT = 3;
 
 export default function HomeScreen() {
   const db = useSQLiteContext();
@@ -25,6 +28,7 @@ export default function HomeScreen() {
 
   const [tags, setTags] = useState<TagCount[]>([]);
   const [recent, setRecent] = useState<RecipeListItem[]>([]);
+  const [viewed, setViewed] = useState<RecipeListItem[]>([]);
   const [categories, setCategories] = useState<CategoryWithCount[]>([]);
   const [results, setResults] = useState<RecipeListItem[]>([]);
   // Bumped on every focus so search results refresh after edits elsewhere.
@@ -36,11 +40,17 @@ export default function HomeScreen() {
   useFocusEffect(
     useCallback(() => {
       let active = true;
-      Promise.all([listTags(db), listRecentRecipes(db, 5), listCategoriesWithCounts(db)]).then(
-        ([t, r, c]) => {
+      Promise.all([
+        listTags(db),
+        listRecentRecipes(db, RECENT_LIMIT),
+        listRecentlyViewedRecipes(db, RECENT_LIMIT),
+        listCategoriesWithCounts(db),
+      ]).then(
+        ([t, r, v, c]) => {
           if (!active) return;
           setTags(t);
           setRecent(r);
+          setViewed(v);
           setCategories(c);
           // Drop a selected tag that no recipe uses any more.
           setSelectedTags((sel) => sel.filter((s) => t.some((x) => x.name.toLowerCase() === s.toLowerCase())));
@@ -149,6 +159,17 @@ export default function HomeScreen() {
           </Text>
         ) : (
           <>
+            {viewed.length > 0 ? (
+              <>
+                {heading('RECENTLY VIEWED')}
+                <View style={styles.list}>
+                  {viewed.map((r) => (
+                    <RecipeRow key={r.id} item={r} />
+                  ))}
+                </View>
+              </>
+            ) : null}
+
             {heading('RECENTLY ADDED')}
             <View style={styles.list}>
               {recent.map((r) => (

@@ -1,5 +1,7 @@
 import type { SQLiteDatabase } from 'expo-sqlite';
 
+import { clearRecentlyViewed } from '../db/recent';
+
 export const BACKUP_APP = 'cooking-base';
 export const BACKUP_FORMAT_VERSION = 1;
 
@@ -69,6 +71,7 @@ export async function deleteTempRecipes(db: SQLiteDatabase): Promise<number> {
 export async function deleteAllRecipes(db: SQLiteDatabase): Promise<number> {
   const result = await db.runAsync('DELETE FROM recipes');
   await db.runAsync('DELETE FROM tags');
+  await clearRecentlyViewed(db);
   return result.changes;
 }
 
@@ -254,6 +257,7 @@ export async function restoreBackup(db: SQLiteDatabase, backup: Backup): Promise
     await txn.runAsync('DELETE FROM recipes');
     await txn.runAsync('DELETE FROM tags');
     await txn.runAsync('DELETE FROM categories');
+    await clearRecentlyViewed(txn); // ids change on restore, so old history would point at the wrong recipes
 
     const categoryMap = new Map<number, number>();
     for (const c of backup.categories) {
