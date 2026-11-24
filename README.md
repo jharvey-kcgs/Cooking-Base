@@ -52,8 +52,10 @@ Windows.
 
 **Where this stands right now:** the core cookbook is built and has been
 tested on a real device (including importing a ~94-recipe cookbook doc).
-Still open: cook mode, share as text, print/PDF, share-to-app from the
-browser, category management, and the TestFlight logistics — see
+Category management (add, rename, delete, drag-to-reorder) is built but
+its drag-and-drop has not yet been tried on a device. Still open: cook mode,
+share as text, print/PDF, share-to-app from the browser, and the TestFlight
+logistics — see
 [Section 13](#13-roadmap-genuinely-open-not-yet-built). Current
 version is whatever `version.json` says.
 
@@ -146,7 +148,8 @@ src/
       _layout.tsx                   The Drawer + its screens
       index.tsx                     Home: search, chips, recents, category tiles
       category/[id].tsx             Recipes in one category
-      settings.tsx                  Theme + Units
+      categories.tsx                Manage categories: add, rename, delete, drag to reorder
+      settings.tsx                  Theme + Units (+ link to Manage categories)
       data.tsx                      Stats, export/restore backup, delete TEMP/all
       faq.tsx                       Expandable questions
       about.tsx                     What the app is, version/build, data note
@@ -171,7 +174,8 @@ src/
   db/
     schema.ts                       Table definitions + PRAGMA user_version
                                      migrations (migrateDb)
-    categories.ts                   List / add / counts
+    categories.ts                   List / counts / add / rename / reorder /
+                                     delete (move or delete recipes)
     recipes.ts                      CRUD, search, recent lists, favorites
     tags.ts                         Tag parsing, per-recipe tags, in-use list
     recent.ts                       "Recently viewed" history (stored in settings)
@@ -489,6 +493,21 @@ easy to mangle (some download/transfer paths drop or rename them). If a
 screen mysteriously doesn't exist, check the folder and file names
 character-by-character before debugging code.
 
+### Gotcha #10: Category reordering needs `react-native-reorderable-list`
+
+Install it with `npx expo install react-native-reorderable-list` (it relies on
+`react-native-reanimated` and `react-native-gesture-handler`, already present).
+Dragging works on the **Manage categories** screen, not inside the drawer
+itself: the drawer already owns horizontal swipes, so a drag list inside it
+would fight the open/close gesture. Press and hold a row, then drag. Changes
+show up in the drawer immediately (via `src/state/categoryEvents.ts`).
+
+**Category rules (`src/db/categories.ts`):** names are 1–40 characters and
+unique ignoring case; you can't delete your last category; deleting a
+category with recipes either moves them (TEMP copies included) to another
+category or deletes them with a second confirmation; remaining categories are
+renumbered; deleted recipes are dropped from Recently viewed.
+
 ---
 
 ## 12. TestFlight / Release readiness
@@ -551,9 +570,10 @@ Release build.
 - **Print / PDF** — `expo-print`.
 - **Share-to-app** — send a recipe link from Safari/Chrome straight into the
   import flow (`expo-share-intent`, development build required).
-- **Category management** — categories can currently only be created by
-  cookbook import; the app has no screen to add, rename, reorder, or delete
-  them yet.
+- **Verify category drag-to-reorder on a device.** The Manage categories
+  screen uses `react-native-reorderable-list`; the logic is tested, but the
+  drag gesture could not be tried in the build sandbox. If it misbehaves,
+  the fallback is ▲/▼ buttons on each row (no gesture library needed).
 - **Real app icon and splash screen**, then the first UAT TestFlight build.
 - **Automated tests.** The pure logic (parsers, scaling, units, search,
   backup/restore) was verified with throwaway scripts against a real SQLite

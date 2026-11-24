@@ -18,6 +18,7 @@ export default function DrawerLayout() {
     >
       <Drawer.Screen name="index" options={{ title: 'Cooking Base' }} />
       <Drawer.Screen name="category/[id]" options={{ title: 'Category' }} />
+      <Drawer.Screen name="categories" options={{ title: 'Manage categories' }} />
       <Drawer.Screen name="settings" options={{ title: 'Settings' }} />
       <Drawer.Screen name="data" options={{ title: 'Data' }} />
       <Drawer.Screen name="faq" options={{ title: 'FAQ' }} />

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { router } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 
 import { getUnits, setUnits } from '@/db/settings';
@@ -60,6 +61,17 @@ export default function SettingsScreen() {
           );
         })}
       </View>
+      <Text style={[styles.sectionTitle, styles.gap, { color: colors.textMuted }]}>CATEGORIES</Text>
+      <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+        <Pressable onPress={() => router.navigate('/categories')} style={styles.linkRow}>
+          <Text style={[styles.rowLabel, { color: colors.text }]}>Manage categories</Text>
+          <Text style={{ color: colors.textMuted, fontSize: 22 }}>›</Text>
+        </Pressable>
+      </View>
+      <Text style={[styles.hint, { color: colors.textMuted }]}>
+        Add, rename, delete, and reorder the categories in the menu.
+      </Text>
+
       <Text style={[styles.sectionTitle, styles.gap, { color: colors.textMuted }]}>UNITS</Text>
       <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
         {UNIT_OPTIONS.map(({ value, label }) => {
@@ -90,6 +102,7 @@ const styles = StyleSheet.create({
   gap: { marginTop: 28 },
   sectionTitle: { fontSize: 12, fontWeight: '600', marginBottom: 8, marginLeft: 4 },
   card: { borderWidth: StyleSheet.hairlineWidth, borderRadius: 12, overflow: 'hidden' },
+  linkRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 14, paddingHorizontal: 16 },
   row: { paddingVertical: 14, paddingHorizontal: 16 },
   rowLabel: { fontSize: 16 },
   hint: { marginTop: 16, marginLeft: 4, fontSize: 14 },

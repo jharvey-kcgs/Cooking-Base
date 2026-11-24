@@ -9,6 +9,7 @@ import {
 import { useSQLiteContext } from 'expo-sqlite';
 
 import { listCategories, type Category } from '@/db/categories';
+import { subscribeCategoriesChanged } from '@/state/categoryEvents';
 import { useTheme } from '@/theme/ThemeProvider';
 
 const BOTTOM_ITEMS = [
@@ -35,6 +36,20 @@ export function AppDrawerContent(props: DrawerContentComponentProps) {
     };
   }, [db, pathname]);
 
+  // The Manage Categories screen announces changes so the list updates immediately.
+  useEffect(() => {
+    let active = true;
+    const unsubscribe = subscribeCategoriesChanged(() => {
+      listCategories(db).then((rows) => {
+        if (active) setCategories(rows);
+      });
+    });
+    return () => {
+      active = false;
+      unsubscribe();
+    };
+  }, [db]);
+
   const go = (path: string) => {
     router.navigate(path);
     props.navigation.closeDrawer();
@@ -56,7 +71,16 @@ export function AppDrawerContent(props: DrawerContentComponentProps) {
     <DrawerContentScrollView {...props}>
       {item('Home', '/')}
 
-      <Text style={[styles.section, { color: colors.textMuted }]}>CATEGORIES</Text>
+      <View style={styles.sectionRow}>
+        <Text style={[styles.section, { color: colors.textMuted }]}>CATEGORIES</Text>
+        <Text
+          style={[styles.manage, { color: colors.primary }]}
+          onPress={() => go('/categories')}
+          accessibilityRole="button"
+        >
+          Manage
+        </Text>
+      </View>
       {categories.map((c) => item(c.name, `/category/${c.id}`))}
 
       <View style={[styles.divider, { backgroundColor: colors.border }]} />
@@ -66,12 +90,21 @@ export function AppDrawerContent(props: DrawerContentComponentProps) {
 }
 
 const styles = StyleSheet.create({
+  sectionRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: 16,
+    marginBottom: 4,
+    marginHorizontal: 20,
+  },
   section: {
     fontSize: 12,
     fontWeight: '600',
-    marginTop: 16,
-    marginBottom: 4,
-    marginLeft: 20,
+  },
+  manage: {
+    fontSize: 14,
+    fontWeight: '600',
   },
   divider: {
     height: StyleSheet.hairlineWidth,

@@ -29,6 +29,14 @@ const FAQ: { q: string; a: string }[] = [
     a: 'Open the recipe and tap Edit to change its category. To delete, open the recipe and use the Delete button at the bottom.',
   },
   {
+    q: 'How do I add, rename, delete, or reorder categories?',
+    a: 'Open the menu and tap Manage next to CATEGORIES (or go to Settings > Manage categories). Type a name and tap Add for a new one. Tap a category to rename it. Press and hold a row, then drag to change its order; the menu follows that order right away.',
+  },
+  {
+    q: 'What happens to recipes when I delete a category?',
+    a: 'You choose: move them to another category, or delete them along with the category (you are asked to confirm twice). You always need at least one category, so the last one cannot be deleted.',
+  },
+  {
     q: 'How do I search for a recipe?',
     a: 'Use the search bar on the Home screen. It looks through titles, ingredients, notes, categories, and tags, and every word you type has to match, so "chicken beans" finds recipes with both. Results update as you type.',
   },
