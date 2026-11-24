@@ -1,5 +1,89 @@
-import { PlaceholderScreen } from '@/components/PlaceholderScreen';
+import { useState } from 'react';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+
+import { useTheme } from '@/theme/ThemeProvider';
+
+const FAQ: { q: string; a: string }[] = [
+  {
+    q: 'How do I add a recipe?',
+    a: 'Tap the + button on the Home or category screen. You can write a recipe yourself, or import one from a web link, a Google Doc link, or pasted text. Imports always open in the edit form first so you can fix anything before saving.',
+  },
+  {
+    q: 'Which websites can I import from?',
+    a: 'Most recipe sites work, because they publish their recipe in a standard format the app can read. If a site does not, copy the recipe text and use "Paste text" instead.',
+  },
+  {
+    q: 'How do I import from a Google Doc?',
+    a: 'In Google Docs tap Share, then set General access to "Anyone with the link" (Viewer). Copy that link and paste it into the app. If the doc is private the import cannot read it, but you can still copy the text and paste it.',
+  },
+  {
+    q: 'Can I import a whole cookbook at once?',
+    a: 'Yes. Tap + then "Import a whole cookbook" and paste the link or text. Recipes are split on separator lines, and section headings that match your categories (like "Entrees") are used to file them. Missing categories are created for you. You review the list and choose what to import. Recipes already in the app are skipped, so it is safe to import the same doc twice.',
+  },
+  {
+    q: 'My recipe came in with a missing or odd line. What now?',
+    a: 'Open the recipe and tap Edit. Ingredients are one per line and steps are one per line. Lines the app cannot read as a quantity are kept as written.',
+  },
+  {
+    q: 'How do I move or delete a recipe?',
+    a: 'Open the recipe and tap Edit to change its category. To delete, open the recipe and use the Delete button at the bottom.',
+  },
+  {
+    q: 'Where is my data stored?',
+    a: 'Only on your phone. There is no account and no cloud copy, which means deleting the app deletes your recipes.',
+  },
+  {
+    q: 'How do I back up my recipes?',
+    a: 'Go to Data and tap Export backup, then save the file to Files, AirDrop it, or email it to yourself. To restore, tap Restore from backup and choose that file. Restoring replaces everything currently in the app. You can also use this to move your recipes to a new phone.',
+  },
+  {
+    q: 'How do I switch between light and dark?',
+    a: 'Open Settings and pick Light or Dark under Theme.',
+  },
+];
 
 export default function FaqScreen() {
-  return <PlaceholderScreen title="FAQ" subtitle="Answers to common questions will go here." />;
+  const { colors } = useTheme();
+  const [open, setOpen] = useState<number | null>(null);
+
+  return (
+    <ScrollView
+      style={{ backgroundColor: colors.background }}
+      contentContainerStyle={styles.content}
+    >
+      <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+        {FAQ.map((item, i) => {
+          const expanded = open === i;
+          return (
+            <View
+              key={item.q}
+              style={i > 0 && { borderTopColor: colors.border, borderTopWidth: StyleSheet.hairlineWidth }}
+            >
+              <Pressable
+                onPress={() => setOpen(expanded ? null : i)}
+                style={styles.question}
+                accessibilityRole="button"
+                accessibilityState={{ expanded }}
+              >
+                <Text style={[styles.q, { color: colors.text }]}>{item.q}</Text>
+                <Text style={[styles.chevron, { color: colors.textMuted }]}>{expanded ? '−' : '+'}</Text>
+              </Pressable>
+              {expanded ? (
+                <Text style={[styles.a, { color: colors.textMuted }]}>{item.a}</Text>
+              ) : null}
+            </View>
+          );
+        })}
+      </View>
+    </ScrollView>
+  );
 }
+
+const styles = StyleSheet.create({
+  content: { padding: 16, paddingBottom: 48 },
+  card: { borderWidth: StyleSheet.hairlineWidth, borderRadius: 12, overflow: 'hidden' },
+  question: { flexDirection: 'row', alignItems: 'center', padding: 16 },
+  q: { flex: 1, fontSize: 16, fontWeight: '600', paddingRight: 12 },
+  chevron: { fontSize: 22 },
+  a: { fontSize: 15, lineHeight: 22, paddingHorizontal: 16, paddingBottom: 16 },
+});
