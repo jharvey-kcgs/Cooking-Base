@@ -1,0 +1,33 @@
+{
+  "cli": {
+    "version": ">= 16.0.0",
+    "appVersionSource": "remote"
+  },
+  "build": {
+    "development": {
+      "developmentClient": true,
+      "distribution": "internal",
+      "env": {
+        "APP_VARIANT": "uat"
+      }
+    },
+    "uat": {
+      "distribution": "store",
+      "autoIncrement": true,
+      "env": {
+        "APP_VARIANT": "uat"
+      }
+    },
+    "store": {
+      "distribution": "store",
+      "autoIncrement": true,
+      "env": {
+        "APP_VARIANT": "store"
+      }
+    }
+  },
+  "submit": {
+    "uat": {},
+    "store": {}
+  }
+}
