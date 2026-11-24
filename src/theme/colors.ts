@@ -8,6 +8,7 @@ export type Palette = {
   primary: string;
   onPrimary: string;
   border: string;
+  danger: string;
 };
 
 export const palettes: Record<ThemeMode, Palette> = {
@@ -19,6 +20,7 @@ export const palettes: Record<ThemeMode, Palette> = {
     primary: '#D9622B',
     onPrimary: '#FFFFFF',
     border: '#EADBCB',
+    danger: '#B3261E',
   },
   dark: {
     background: '#1A1512',
@@ -28,5 +30,6 @@ export const palettes: Record<ThemeMode, Palette> = {
     primary: '#F08A57',
     onPrimary: '#1A1512',
     border: '#3A302A',
+    danger: '#F2766E',
   },
 };
