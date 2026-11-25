@@ -52,10 +52,10 @@ Windows.
 
 **Where this stands right now:** the core cookbook is built and has been
 tested on a real device (including importing a ~94-recipe cookbook doc).
-Category management (add, rename, delete, drag-to-reorder) is built but
-its drag-and-drop has not yet been tried on a device. Cook mode is built
-(also untested on a device). Still open: share as text, print/PDF, share-to-app from the browser, and the TestFlight
-logistics — see
+Category management (add, rename, delete, drag-to-reorder) and cook mode
+are built and were checked on a device (cook mode still needs a real meal).
+Share (text, PDF, print) is built but not yet tried on a device. Still open: share-to-app
+from the browser, the splash screen, and the TestFlight logistics — see
 [Section 13](#13-roadmap-genuinely-open-not-yet-built). Current
 version is whatever `version.json` says.
 
@@ -100,7 +100,8 @@ npx expo install <package-name>
 | `react-native-screens`, `react-native-safe-area-context` | Required by the navigation stack |
 | `expo-sqlite` | The whole recipe database — recipes, ingredients, tags, settings |
 | `expo-file-system` | Writes the backup file (new `File` / `Paths` API) and reads a picked backup |
-| `expo-sharing` | Opens the native share sheet for the backup file |
+| `expo-sharing` | Opens the native share sheet for files (backup, recipe PDF) |
+| `expo-print` | Builds recipe PDFs and opens the print dialog |
 | `expo-document-picker` | Lets you choose a backup file to restore |
 | `expo-keep-awake` | Keeps the screen on in cook mode |
 | `expo-constants` | Reads the app version / variant for the About screen |
@@ -191,6 +192,8 @@ src/
     cookbookImport.ts               Plan (category matching, duplicates) + run
     backup.ts                       Build / validate / restore backups, data stats
     backupFiles.ts                  The thin file + share-sheet + picker layer
+    recipeText.ts                   Pure builders: share text, printable HTML, PDF file name
+    shareRecipe.ts                  Thin layer: share text / share PDF / print
     importers/
       fromUrl.ts                    Web page -> schema.org Recipe JSON-LD
       fromGoogleDoc.ts              Link -> plain-text export
@@ -382,6 +385,24 @@ text, Back / Next, "Start over" on the last step) and **Ingredients** (tap to
 check off; checks are not saved). **A− / A+** in the header picks one of five
 text sizes, remembered in settings key `cookTextSize`. Nothing in the database
 changes, and no migration was needed.
+
+### Sharing
+
+The **Share** button on a recipe opens a menu: **Share as text**, **Share as
+PDF**, **Print**. It shares exactly what is on screen (the current scaled
+servings and your Metric / Standard setting), without the "(TEMP)" suffix.
+
+- **Text** goes through React Native's `Share`, so the phone's own share sheet
+  offers Messages, Mail, Messenger, Facebook, Notes, AirDrop, and so on.
+  Layout: title, category · servings, ingredients, numbered steps, notes,
+  source link, "Shared from Cooking Base".
+- **PDF** is built with `expo-print` from simple HTML (`buildRecipeHtml`),
+  copied to a readable name (e.g. `Grandmas Cookies.pdf`), then handed to
+  `expo-sharing` so it can be attached to a text, email, or message.
+- **Print** opens the system print dialog (AirPrint on iPhone).
+- All the formatting is pure and tested (`recipeText.ts`); `shareRecipe.ts` is
+  the thin layer that touches the phone. Some apps (Facebook especially) ignore
+  pre-filled text from a share sheet; the PDF or a copy-paste works there.
 
 ---
 
@@ -589,17 +610,11 @@ Release build.
 ## 13. Roadmap (genuinely open, not yet built)
 
 **Planned for v1**
-- **Verify cook mode on a device** — built (see the Cook mode note at the end of Section 8); confirm the
-  screen really stays awake and the text sizes feel right in a kitchen.
-- **Share as text** — a clean recipe + source footer through the native share
-  sheet (email, Messages, Messenger...).
-- **Print / PDF** — `expo-print`.
+- **Cook a real meal with cook mode** — drag-to-reorder and cook mode were checked on a device; a full cook is still to come.
+- **Try Share on a device** — built (see "Sharing" at the end of Section 8):
+  confirm Messages, Mail, Messenger/Facebook, PDF, and AirPrint all behave.
 - **Share-to-app** — send a recipe link from Safari/Chrome straight into the
   import flow (`expo-share-intent`, development build required).
-- **Verify category drag-to-reorder on a device.** The Manage categories
-  screen uses `react-native-reorderable-list`; the logic is tested, but the
-  drag gesture could not be tried in the build sandbox. If it misbehaves,
-  the fallback is ▲/▼ buttons on each row (no gesture library needed).
 - **Splash screen** (the app icon is done), then the first UAT TestFlight build.
 - **Automated tests.** The pure logic (parsers, scaling, units, search,
   backup/restore) was verified with throwaway scripts against a real SQLite

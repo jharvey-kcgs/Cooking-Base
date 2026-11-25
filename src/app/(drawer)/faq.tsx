@@ -41,6 +41,10 @@ const FAQ: { q: string; a: string }[] = [
     a: 'Open a recipe and tap Start cooking. The screen stays on while you cook. Steps shows one step at a time in large text with Back and Next buttons; Ingredients lets you tap items to check them off. Use A− and A+ at the top to change the text size (it is remembered). If you scaled the servings first, cook mode uses that amount, and it follows your Metric / Standard setting.',
   },
   {
+    q: 'How do I share a recipe?',
+    a: 'Open the recipe and tap Share. Choose Share as text to send it through Messages, Mail, Messenger, or any app on your phone. Choose Share as PDF to attach a nicely formatted file instead, or Print to send it to a printer. It shares what you see on screen, including any servings you scaled and your Metric / Standard setting. Some apps, like Facebook, ignore pre-filled text; use the PDF there.',
+  },
+  {
     q: 'How do I search for a recipe?',
     a: 'Use the search bar on the Home screen. It looks through titles, ingredients, notes, categories, and tags, and every word you type has to match, so "chicken beans" finds recipes with both. Results update as you type.',
   },

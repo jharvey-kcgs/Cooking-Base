@@ -1,5 +1,15 @@
 import { useCallback, useState } from 'react';
-import { Alert, Linking, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import {
+  ActionSheetIOS,
+  Alert,
+  Linking,
+  Platform,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 import { Stack, router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 
@@ -16,6 +26,8 @@ import {
   scaleIngredients,
   scaleRatio,
 } from '@/services/scale';
+import { prepareShareable } from '@/services/recipeText';
+import { printRecipe, shareRecipePdf, shareRecipeText } from '@/services/shareRecipe';
 import { convertTemperatures, type UnitSystem } from '@/services/units';
 import { useTheme } from '@/theme/ThemeProvider';
 import type { Recipe } from '@/types/recipe';
@@ -109,6 +121,36 @@ export default function RecipeScreen() {
     }
   };
 
+  // Shares what is on screen: the current (possibly scaled) servings and units.
+  const openShareMenu = () => {
+    if (!recipe) return;
+    const shareable = prepareShareable(recipe, categoryName, servings, units);
+    const run = async (action: () => Promise<unknown>) => {
+      try {
+        const result = await action();
+        if (result === false) Alert.alert('Not available', 'Sharing files is not available on this device.');
+      } catch (e) {
+        Alert.alert('Could not share', e instanceof Error ? e.message : String(e));
+      }
+    };
+    const actions = [
+      { label: 'Share as text', run: () => run(() => shareRecipeText(shareable)) },
+      { label: 'Share as PDF', run: () => run(() => shareRecipePdf(shareable)) },
+      { label: 'Print', run: () => run(() => printRecipe(shareable)) },
+    ];
+    if (Platform.OS === 'ios') {
+      ActionSheetIOS.showActionSheetWithOptions(
+        { title: 'Share recipe', options: [...actions.map((a) => a.label), 'Cancel'], cancelButtonIndex: actions.length },
+        (index) => actions[index]?.run(),
+      );
+    } else {
+      Alert.alert('Share recipe', undefined, [
+        ...actions.map((a) => ({ text: a.label, onPress: a.run })),
+        { text: 'Cancel', style: 'cancel' as const },
+      ]);
+    }
+  };
+
   if (!loaded) return <View style={{ flex: 1, backgroundColor: colors.background }} />;
 
   if (!recipe) {
@@ -199,15 +241,18 @@ export default function RecipeScreen() {
         </View>
       ) : null}
 
-      {recipe.instructions.length > 0 || recipe.ingredients.length > 0 ? (
-        <AppButton
-          label="Start cooking"
-          onPress={() =>
-            router.push({ pathname: '/recipe/cook/[id]', params: { id: String(recipe.id), servings: String(servings) } })
-          }
-          style={styles.cook}
-        />
-      ) : null}
+      <View style={styles.actionRow}>
+        {recipe.instructions.length > 0 || recipe.ingredients.length > 0 ? (
+          <AppButton
+            label="Start cooking"
+            onPress={() =>
+              router.push({ pathname: '/recipe/cook/[id]', params: { id: String(recipe.id), servings: String(servings) } })
+            }
+            style={styles.actionMain}
+          />
+        ) : null}
+        <AppButton variant="secondary" label="Share" onPress={openShareMenu} style={styles.actionShare} />
+      </View>
 
       {heading('INGREDIENTS')}
       {recipe.ingredients.length === 0 ? (
@@ -276,7 +321,9 @@ const styles = StyleSheet.create({
   headerButtons: { flexDirection: 'row', alignItems: 'center', gap: 18 },
   tagRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginTop: 10 },
   tag: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 14, borderWidth: StyleSheet.hairlineWidth },
-  cook: { marginTop: 16 },
+  actionRow: { flexDirection: 'row', gap: 10, marginTop: 16 },
+  actionMain: { flex: 1 },
+  actionShare: { flex: 1 },
   deleteGap: { marginTop: 12 },
   stepper: { flexDirection: 'row', alignItems: 'center', borderWidth: StyleSheet.hairlineWidth, borderRadius: 12, paddingVertical: 10, paddingHorizontal: 14, marginTop: 16 },
   stepperLabel: { flex: 1, fontSize: 16, fontWeight: '600' },
