@@ -571,7 +571,10 @@ npm run bump -- 2.0.0            # set an exact version
 ```
 
 Building iOS and Android separately bumps twice; bump first and use plain
-`eas build` if you want one shared version. Commit `version.json` after a
+`eas build` if you want one shared version. Plain `eas build` / `eas submit`
+(no `--profile`) look for a profile named `production`; here that is an alias
+that extends `uat`, so it makes a normal UAT TestFlight build and can never
+accidentally produce the public Store app (that needs `--profile store`). Commit `version.json` after a
 bump. The About screen shows the live version and whether it's a UAT or
 Release build.
 

@@ -24,10 +24,14 @@
       "env": {
         "APP_VARIANT": "store"
       }
+    },
+    "production": {
+      "extends": "uat"
     }
   },
   "submit": {
     "uat": {},
-    "store": {}
+    "store": {},
+    "production": {}
   }
 }
