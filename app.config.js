@@ -43,7 +43,23 @@ module.exports = ({ config }) => ({
   web: {
     favicon: './assets/favicon.png',
   },
-  plugins: ['expo-router'],
+  plugins: [
+    'expo-router',
+    [
+      'expo-splash-screen',
+      {
+        image: './assets/splash-icon.png',
+        imageWidth: 240,
+        resizeMode: 'contain',
+        // Matches the app's own light/dark backgrounds so the hand-off is seamless.
+        backgroundColor: '#FFF8F0',
+        dark: {
+          image: './assets/splash-icon-dark.png',
+          backgroundColor: '#1A1512',
+        },
+      },
+    ],
+  ],
   extra: {
     ...config.extra,
     variant: IS_STORE ? 'store' : 'uat',

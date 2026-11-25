@@ -54,8 +54,9 @@ Windows.
 tested on a real device (including importing a ~94-recipe cookbook doc).
 Category management (add, rename, delete, drag-to-reorder) and cook mode
 are built and were checked on a device (cook mode still needs a real meal).
-Share (text, PDF, print) is built but not yet tried on a device. Still open: share-to-app
-from the browser, the splash screen, and the TestFlight logistics — see
+Share (text, PDF, print) and the splash screen are built; Share was
+confirmed on a device. Still open: share-to-app from the browser and the
+TestFlight logistics — see
 [Section 13](#13-roadmap-genuinely-open-not-yet-built). Current
 version is whatever `version.json` says.
 
@@ -102,6 +103,7 @@ npx expo install <package-name>
 | `expo-file-system` | Writes the backup file (new `File` / `Paths` API) and reads a picked backup |
 | `expo-sharing` | Opens the native share sheet for files (backup, recipe PDF) |
 | `expo-print` | Builds recipe PDFs and opens the print dialog |
+| `expo-splash-screen` | Launch screen (config plugin in `app.config.js`; needs a native rebuild to change) |
 | `expo-document-picker` | Lets you choose a backup file to restore |
 | `expo-keep-awake` | Keeps the screen on in cook mode |
 | `expo-constants` | Reads the app version / variant for the About screen |
@@ -570,7 +572,12 @@ Current status, as of this writing:
   has a solid `#EEE3CD` background layer, the artwork scaled to ~70% and
   centered as the foreground (so launcher masks don't clip it), and a
   one-color monochrome layer for themed icons. `favicon.png` is 48 px.
-  `splash-icon.png` is updated too, but no splash screen is configured yet.
+  The **splash screen** is the same artwork, transparent, in dark ink on the
+  light app background (`#FFF8F0`) and cream ink on the dark one (`#1A1512`),
+  so it matches the app's own themes and follows the phone's light/dark
+  setting: `splash-icon.png` and `splash-icon-dark.png`, set up through the
+  `expo-splash-screen` plugin in `app.config.js` (width 240). Splash changes
+  are native, so they need a new build, not just a reload.
 - **iPad:** `ios.supportsTablet` is `false`, so no separate iPad screenshot
   set is needed (unlike League Base).
 - **App Store Connect metadata** (description, keywords, review notes,
@@ -611,11 +618,9 @@ Release build.
 
 **Planned for v1**
 - **Cook a real meal with cook mode** — drag-to-reorder and cook mode were checked on a device; a full cook is still to come.
-- **Try Share on a device** — built (see "Sharing" at the end of Section 8):
-  confirm Messages, Mail, Messenger/Facebook, PDF, and AirPrint all behave.
 - **Share-to-app** — send a recipe link from Safari/Chrome straight into the
   import flow (`expo-share-intent`, development build required).
-- **Splash screen** (the app icon is done), then the first UAT TestFlight build.
+- First UAT TestFlight build (icon and splash screen are done).
 - **Automated tests.** The pure logic (parsers, scaling, units, search,
   backup/restore) was verified with throwaway scripts against a real SQLite
   engine and a real cookbook document, but no test suite is checked in yet.
