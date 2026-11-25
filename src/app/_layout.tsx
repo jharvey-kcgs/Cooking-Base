@@ -29,6 +29,7 @@ function RootStack() {
         <Stack.Screen name="recipe/cookbook" options={{ title: 'Import cookbook' }} />
         <Stack.Screen name="recipe/edit" options={{ title: 'Recipe' }} />
         <Stack.Screen name="recipe/[id]" options={{ title: '' }} />
+        <Stack.Screen name="recipe/cook/[id]" options={{ title: '' }} />
       </Stack>
     </>
   );
