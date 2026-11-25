@@ -53,8 +53,8 @@ Windows.
 **Where this stands right now:** the core cookbook is built and has been
 tested on a real device (including importing a ~94-recipe cookbook doc).
 Category management (add, rename, delete, drag-to-reorder) is built but
-its drag-and-drop has not yet been tried on a device. Still open: cook mode,
-share as text, print/PDF, share-to-app from the browser, and the TestFlight
+its drag-and-drop has not yet been tried on a device. Cook mode is built
+(also untested on a device). Still open: share as text, print/PDF, share-to-app from the browser, and the TestFlight
 logistics — see
 [Section 13](#13-roadmap-genuinely-open-not-yet-built). Current
 version is whatever `version.json` says.
@@ -102,6 +102,7 @@ npx expo install <package-name>
 | `expo-file-system` | Writes the backup file (new `File` / `Paths` API) and reads a picked backup |
 | `expo-sharing` | Opens the native share sheet for the backup file |
 | `expo-document-picker` | Lets you choose a backup file to restore |
+| `expo-keep-awake` | Keeps the screen on in cook mode |
 | `expo-constants` | Reads the app version / variant for the About screen |
 | `expo-linking`, `expo-status-bar`, `expo-system-ui` | Router and shell plumbing |
 | `react-dom` (pinned `19.3.0`) | Only here to satisfy a peer dependency — see [Gotcha #3](#gotcha-3-eresolve-with-react-dom) |
@@ -160,6 +161,7 @@ src/
       cookbook.tsx                  Whole-cookbook import: paste, then review
                                      and select what to import
       edit.tsx                      Add / edit form (incl. tags)
+      cook/[id].tsx                 Cook mode: big text, step-by-step, ingredient checklist
       [id].tsx                      Recipe view: favorite, tags, servings
                                      stepper, unit conversion, scaled copies
 
@@ -370,6 +372,17 @@ ranges like "1-2 cups" are never scaled.
   history lives in the `settings` table (last 10 ids) and skips TEMP copies
   and deleted recipes.
 
+### Cook mode
+
+**Start cooking** on the recipe view opens `recipe/cook/[id].tsx`, passing the
+current (possibly scaled) servings, so cook mode shows the same amounts and
+follows the Metric / Standard setting. `useKeepAwake()` keeps the screen on
+only while that screen is open. Two tabs: **Steps** (one step at a time, large
+text, Back / Next, "Start over" on the last step) and **Ingredients** (tap to
+check off; checks are not saved). **A− / A+** in the header picks one of five
+text sizes, remembered in settings key `cookTextSize`. Nothing in the database
+changes, and no migration was needed.
+
 ---
 
 ## 9. Backup & restore
@@ -563,8 +576,8 @@ Release build.
 ## 13. Roadmap (genuinely open, not yet built)
 
 **Planned for v1**
-- **Cook mode** — large text, one step at a time, screen stays awake
-  (`expo-keep-awake`).
+- **Verify cook mode on a device** — built (see the Cook mode note at the end of Section 8); confirm the
+  screen really stays awake and the text sizes feel right in a kitchen.
 - **Share as text** — a clean recipe + source footer through the native share
   sheet (email, Messages, Messenger...).
 - **Print / PDF** — `expo-print`.

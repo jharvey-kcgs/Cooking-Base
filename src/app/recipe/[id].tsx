@@ -199,6 +199,16 @@ export default function RecipeScreen() {
         </View>
       ) : null}
 
+      {recipe.instructions.length > 0 || recipe.ingredients.length > 0 ? (
+        <AppButton
+          label="Start cooking"
+          onPress={() =>
+            router.push({ pathname: '/recipe/cook/[id]', params: { id: String(recipe.id), servings: String(servings) } })
+          }
+          style={styles.cook}
+        />
+      ) : null}
+
       {heading('INGREDIENTS')}
       {recipe.ingredients.length === 0 ? (
         <Text style={[styles.body, { color: colors.textMuted }]}>No ingredients added.</Text>
@@ -266,6 +276,7 @@ const styles = StyleSheet.create({
   headerButtons: { flexDirection: 'row', alignItems: 'center', gap: 18 },
   tagRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginTop: 10 },
   tag: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 14, borderWidth: StyleSheet.hairlineWidth },
+  cook: { marginTop: 16 },
   deleteGap: { marginTop: 12 },
   stepper: { flexDirection: 'row', alignItems: 'center', borderWidth: StyleSheet.hairlineWidth, borderRadius: 12, paddingVertical: 10, paddingHorizontal: 14, marginTop: 16 },
   stepperLabel: { flex: 1, fontSize: 16, fontWeight: '600' },

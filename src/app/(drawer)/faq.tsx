@@ -37,6 +37,10 @@ const FAQ: { q: string; a: string }[] = [
     a: 'You choose: move them to another category, or delete them along with the category (you are asked to confirm twice). You always need at least one category, so the last one cannot be deleted.',
   },
   {
+    q: 'What is cook mode?',
+    a: 'Open a recipe and tap Start cooking. The screen stays on while you cook. Steps shows one step at a time in large text with Back and Next buttons; Ingredients lets you tap items to check them off. Use A− and A+ at the top to change the text size (it is remembered). If you scaled the servings first, cook mode uses that amount, and it follows your Metric / Standard setting.',
+  },
+  {
     q: 'How do I search for a recipe?',
     a: 'Use the search bar on the Home screen. It looks through titles, ingredients, notes, categories, and tags, and every word you type has to match, so "chicken beans" finds recipes with both. Results update as you type.',
   },
