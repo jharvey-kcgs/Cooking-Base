@@ -540,6 +540,9 @@ Current status, as of this writing:
   `eas init` fails with "Cannot read properties of undefined (reading
   'projectId')", that block is what's missing.) The first build hasn't been
   run yet: `npm run build:uat:ios`.
+  The same limitation hit Apple's export-compliance prompt, so
+  `ios.infoPlist.ITSAppUsesNonExemptEncryption: false` is also set by hand
+  (answer "yes, only standard/exempt encryption" is correct for this app).
 - **App icon:** the open-cookbook illustration (made in Canva). Everything in
   `assets/` is generated from one 1264 px source: `icon.png` is a 1024 px
   opaque square (iOS rounds the corners itself); the Android adaptive icon

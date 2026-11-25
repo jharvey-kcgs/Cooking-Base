@@ -23,6 +23,12 @@ module.exports = ({ config }) => ({
   ios: {
     supportsTablet: false,
     bundleIdentifier: BUNDLE_ID,
+    // Answers Apple's export-compliance question once: the app only uses
+    // standard/exempt encryption (HTTPS). Set by hand because eas-cli can't
+    // write to a dynamic config.
+    infoPlist: {
+      ITSAppUsesNonExemptEncryption: false,
+    },
   },
   android: {
     package: BUNDLE_ID,
