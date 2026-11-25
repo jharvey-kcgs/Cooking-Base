@@ -537,9 +537,13 @@ Current status, as of this writing:
 - **Config is ready; the first build hasn't been run.** Remaining one-time
   steps: `eas init` (links the project and adds its id), then
   `npm run build:uat:ios`.
-- **App icon / splash:** currently the Expo template images in `assets/` —
-  replace `icon.png`, `splash-icon.png`, and the Android icon layers before
-  the first TestFlight build.
+- **App icon:** the open-cookbook illustration (made in Canva). Everything in
+  `assets/` is generated from one 1264 px source: `icon.png` is a 1024 px
+  opaque square (iOS rounds the corners itself); the Android adaptive icon
+  has a solid `#EEE3CD` background layer, the artwork scaled to ~70% and
+  centered as the foreground (so launcher masks don't clip it), and a
+  one-color monochrome layer for themed icons. `favicon.png` is 48 px.
+  `splash-icon.png` is updated too, but no splash screen is configured yet.
 - **iPad:** `ios.supportsTablet` is `false`, so no separate iPad screenshot
   set is needed (unlike League Base).
 - **App Store Connect metadata** (description, keywords, review notes,
@@ -587,7 +591,7 @@ Release build.
   screen uses `react-native-reorderable-list`; the logic is tested, but the
   drag gesture could not be tried in the build sandbox. If it misbehaves,
   the fallback is ▲/▼ buttons on each row (no gesture library needed).
-- **Real app icon and splash screen**, then the first UAT TestFlight build.
+- **Splash screen** (the app icon is done), then the first UAT TestFlight build.
 - **Automated tests.** The pure logic (parsers, scaling, units, search,
   backup/restore) was verified with throwaway scripts against a real SQLite
   engine and a real cookbook document, but no test suite is checked in yet.

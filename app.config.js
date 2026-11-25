@@ -27,7 +27,7 @@ module.exports = ({ config }) => ({
   android: {
     package: BUNDLE_ID,
     adaptiveIcon: {
-      backgroundColor: '#FFF8F0',
+      backgroundColor: '#EEE3CD',
       foregroundImage: './assets/android-icon-foreground.png',
       backgroundImage: './assets/android-icon-background.png',
       monochromeImage: './assets/android-icon-monochrome.png',
