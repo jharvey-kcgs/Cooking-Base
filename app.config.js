@@ -46,6 +46,19 @@ module.exports = ({ config }) => ({
   plugins: [
     'expo-router',
     [
+      'expo-share-intent',
+      {
+        // Shows up in the Share sheet for web pages and plain text.
+        iosShareExtensionName: IS_STORE ? 'My Cooking Base' : 'Cooking Base',
+        iosActivationRules: {
+          NSExtensionActivationSupportsWebURLWithMaxCount: 1,
+          NSExtensionActivationSupportsWebPageWithMaxCount: 1,
+          NSExtensionActivationSupportsText: true,
+        },
+        androidIntentFilters: ['text/*'],
+      },
+    ],
+    [
       'expo-splash-screen',
       {
         image: './assets/splash-icon.png',

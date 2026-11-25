@@ -55,8 +55,8 @@ tested on a real device (including importing a ~94-recipe cookbook doc).
 Category management (add, rename, delete, drag-to-reorder) and cook mode
 are built and were checked on a device (cook mode still needs a real meal).
 Share (text, PDF, print) and the splash screen are built; Share was
-confirmed on a device. Still open: share-to-app from the browser and the
-TestFlight logistics — see
+confirmed on a device. Share-to-app (Safari/Chrome → Cooking Base) is built
+but needs a real build to test. Still open: TestFlight logistics — see
 [Section 13](#13-roadmap-genuinely-open-not-yet-built). Current
 version is whatever `version.json` says.
 
@@ -70,8 +70,7 @@ version is whatever `version.json` says.
 - [VS Code](https://code.visualstudio.com) (or any editor)
 - **Expo Go** on your phone, or a development build, for live preview. Every
   native module used so far (SQLite, file system, sharing, document picker)
-  works in Expo Go. Share-to-app from the browser, when it's built, will
-  need a development build — see [Gotcha #8](#gotcha-8-share-to-app-needs-a-development-build).
+  works in Expo Go. Share-to-app from the browser needs a real build — see [Gotcha #8](#gotcha-8-share-to-app-needs-a-development-build).
 - An **Apple Developer account** ($99/year) once you're past local testing
   and moving toward TestFlight — see [Section 12](#12-testflight--release-readiness).
 
@@ -103,6 +102,7 @@ npx expo install <package-name>
 | `expo-file-system` | Writes the backup file (new `File` / `Paths` API) and reads a picked backup |
 | `expo-sharing` | Opens the native share sheet for files (backup, recipe PDF) |
 | `expo-print` | Builds recipe PDFs and opens the print dialog |
+| `expo-share-intent` | Adds Cooking Base to the phone's Share sheet (iOS Share extension + Android intent) |
 | `expo-splash-screen` | Launch screen (config plugin in `app.config.js`; needs a native rebuild to change) |
 | `expo-document-picker` | Lets you choose a backup file to restore |
 | `expo-keep-awake` | Keeps the screen on in cook mode |
@@ -196,6 +196,7 @@ src/
     backupFiles.ts                  The thin file + share-sheet + picker layer
     recipeText.ts                   Pure builders: share text, printable HTML, PDF file name
     shareRecipe.ts                  Thin layer: share text / share PDF / print
+    sharedImport.ts                 Pure: decides what a shared link / text should do
     importers/
       fromUrl.ts                    Web page -> schema.org Recipe JSON-LD
       fromGoogleDoc.ts              Link -> plain-text export
@@ -321,6 +322,47 @@ recipes. Built and verified against a real 94-recipe cookbook, not a guess:
    with checkboxes, Select all/none, warnings, and "Import N recipes".
 7. **Duplicates** (same category + case-insensitive title) are detected up
    front and disabled, so importing the same document twice adds nothing.
+
+### Share-to-app (Safari / Chrome → Cooking Base)
+
+Pick **Cooking Base** in the Share sheet of a recipe page (or share plain text,
+like a recipe someone texted you) and the app opens the import screen with the
+link already in and the import already running; you then review it in the normal
+edit form. Nothing saves until you confirm.
+
+How it fits together:
+
+- **`expo-share-intent`** plugin in `app.config.js` adds an iOS **Share
+  extension** (a second, tiny target in the Xcode project) and an Android
+  intent filter. Activation rules: web URLs, web pages, and text. Photos and
+  files are ignored.
+- The extension stores what was shared in an **App Group**
+  (`group.<bundle id>`), then opens the app via its link scheme
+  (`cookingbase://dataUrl=...`). `src/app/+native-intent.tsx` sends that odd
+  link to Home so the router doesn't show a "not found" screen.
+- **`ShareIntentProvider`** wraps the root layout (`src/app/_layout.tsx`);
+  **`ShareIntentHandler`** reads the shared content, asks
+  `resolveSharedImport` (`src/services/sharedImport.ts`, pure and tested) what
+  it is — a Google Doc link → Google mode, any other link → web mode, text →
+  paste mode — and pushes `/recipe/import?mode=...&value=...&auto=1`.
+- `recipe/import.tsx` pre-fills `value` and runs the import once if `auto=1`.
+  If the import fails (a site that exposes no recipe data), the error shows
+  with the link still filled in, so you can switch to pasting the text.
+
+Identifiers and cost: each variant gets its own extension, so UAT and Store
+have separate ones (e.g. `com.JHarvey.CookingBase.share-extension` and
+`group.com.JHarvey.CookingBase`). EAS creates and registers them during the
+build; the first build may ask you to sign in to your Apple account and approve
+them. No extra cost beyond the Apple Developer account. `eas.json` and
+`extra.eas.projectId` must stay as they are, or expo-share-intent will try to
+add extra extension settings to the config (see its README, "iOS Extension
+Target").
+
+**Testing:** build with `npm run build:uat:ios`, install from TestFlight, open
+a recipe page in Safari, tap Share, then **More** if Cooking Base isn't in the
+app row yet, and enable it.
+
+---
 
 ---
 
@@ -517,10 +559,11 @@ the original line, which scaling and conversion deliberately leave alone.
 
 ### Gotcha #8: Share-to-app needs a development build
 
-Receiving a link or text from Safari/Chrome's share sheet (planned, via
-`expo-share-intent`) needs custom native code, so it can't be tested in Expo
-Go. Plan for an EAS development build (`eas build --profile development`)
-when that feature starts.
+Receiving a link or text from Safari/Chrome's share sheet (via
+`expo-share-intent`) needs custom native code, so it doesn't work in Expo Go.
+It works in any real build, including TestFlight (`npm run build:uat:ios`), or
+an EAS development build (`eas build --profile development`). See "Share-to-app"
+at the end of Section 6 for how it fits together.
 
 ### Gotcha #9: Copying route files — keep the exact names
 
@@ -618,8 +661,8 @@ Release build.
 
 **Planned for v1**
 - **Cook a real meal with cook mode** — drag-to-reorder and cook mode were checked on a device; a full cook is still to come.
-- **Share-to-app** — send a recipe link from Safari/Chrome straight into the
-  import flow (`expo-share-intent`, development build required).
+- **Test share-to-app on a real build** — built (see "Share-to-app" in Section
+  6); confirm the extension shows up, a recipe page imports, and plain text works.
 - First UAT TestFlight build (icon and splash screen are done).
 - **Automated tests.** The pure logic (parsers, scaling, units, search,
   backup/restore) was verified with throwaway scripts against a real SQLite

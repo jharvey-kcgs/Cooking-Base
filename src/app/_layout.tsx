@@ -1,7 +1,10 @@
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { SQLiteProvider } from 'expo-sqlite';
+import { ShareIntentProvider } from 'expo-share-intent';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+
+import { ShareIntentHandler } from '@/components/ShareIntentHandler';
 
 import { DB_NAME, migrateDb } from '@/db/schema';
 import { ThemeProvider, useTheme } from '@/theme/ThemeProvider';
@@ -31,6 +34,7 @@ function RootStack() {
         <Stack.Screen name="recipe/[id]" options={{ title: '' }} />
         <Stack.Screen name="recipe/cook/[id]" options={{ title: '' }} />
       </Stack>
+      <ShareIntentHandler />
     </>
   );
 }
@@ -38,11 +42,13 @@ function RootStack() {
 export default function RootLayout() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <SQLiteProvider databaseName={DB_NAME} onInit={migrateDb}>
-        <ThemeProvider>
-          <RootStack />
-        </ThemeProvider>
-      </SQLiteProvider>
+      <ShareIntentProvider options={{ resetOnBackground: false }}>
+        <SQLiteProvider databaseName={DB_NAME} onInit={migrateDb}>
+          <ThemeProvider>
+            <RootStack />
+          </ThemeProvider>
+        </SQLiteProvider>
+      </ShareIntentProvider>
     </GestureHandlerRootView>
   );
 }

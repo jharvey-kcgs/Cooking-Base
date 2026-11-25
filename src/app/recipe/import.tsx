@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ScrollView, StyleSheet, Text } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 
@@ -33,11 +33,17 @@ const COPY: Record<Mode, { heading: string; help: string; placeholder: string }>
 
 export default function ImportScreen() {
   const { colors } = useTheme();
-  const { mode: modeParam, categoryId } = useLocalSearchParams<{ mode?: string; categoryId?: string }>();
+  const {
+    mode: modeParam,
+    categoryId,
+    value: sharedValue,
+    auto,
+  } = useLocalSearchParams<{ mode?: string; categoryId?: string; value?: string; auto?: string }>();
   const mode: Mode = modeParam === 'google' || modeParam === 'text' ? modeParam : 'web';
   const copy = COPY[mode];
 
-  const [value, setValue] = useState('');
+  // `value` + `auto` come from the Share sheet: pre-filled, and imported right away.
+  const [value, setValue] = useState(sharedValue ?? '');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -57,6 +63,12 @@ export default function ImportScreen() {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (auto === '1' && sharedValue) void run();
+    // Only once, when the screen opens from the Share sheet.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <ScrollView

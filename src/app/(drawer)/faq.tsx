@@ -45,6 +45,10 @@ const FAQ: { q: string; a: string }[] = [
     a: 'Open the recipe and tap Share. Choose Share as text to send it through Messages, Mail, Messenger, or any app on your phone. Choose Share as PDF to attach a nicely formatted file instead, or Print to send it to a printer. It shares what you see on screen, including any servings you scaled and your Metric / Standard setting. Some apps, like Facebook, ignore pre-filled text; use the PDF there.',
   },
   {
+    q: 'Can I send a recipe to the app from Safari or Chrome?',
+    a: 'Yes. On a recipe page, tap the Share button, then choose Cooking Base in the row of apps (tap More if you do not see it, and switch it on). The app opens, imports the page, and shows it for you to review before saving. You can also share plain recipe text, like one a friend texted you. If a site cannot be read, choose Paste recipe text instead.',
+  },
+  {
     q: 'How do I search for a recipe?',
     a: 'Use the search bar on the Home screen. It looks through titles, ingredients, notes, categories, and tags, and every word you type has to match, so "chicken beans" finds recipes with both. Results update as you type.',
   },
