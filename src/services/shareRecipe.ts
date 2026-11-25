@@ -15,25 +15,33 @@ export async function shareRecipeText(r: ShareableRecipe): Promise<void> {
 // Returns false if file sharing isn't available on this device.
 export async function shareRecipePdf(r: ShareableRecipe): Promise<boolean> {
   if (!(await Sharing.isAvailableAsync())) return false;
-  const { uri } = await Print.printToFileAsync({ html: buildRecipeHtml(r) });
+  const printed = await Print.printToFileAsync({ html: buildRecipeHtml(r), base64: true });
+  const options = { mimeType: 'application/pdf', UTI: 'com.adobe.pdf', dialogTitle: r.title };
 
-  // Give the file a readable name ("Grandmas Cookies.pdf") instead of a random one.
-  let shareUri = uri;
-  try {
-    const named = new File(Paths.cache, pdfFileName(r.title));
-    if (named.exists) named.delete();
-    new File(uri).copy(named);
-    shareUri = named.uri;
-  } catch {
-    // Fall back to the generated name; sharing still works.
+  // Preferred: write the PDF into the app's own cache under a readable name
+  // ("Grandmas Cookies.pdf"), the same way the backup file is written.
+  if (printed.base64) {
+    try {
+      const named = new File(Paths.cache, pdfFileName(r.title));
+      named.create({ overwrite: true });
+      named.write(base64ToBytes(printed.base64));
+      await Sharing.shareAsync(named.uri, options);
+      return true;
+    } catch {
+      // Fall through to the file the print engine made.
+    }
   }
 
-  await Sharing.shareAsync(shareUri, {
-    mimeType: 'application/pdf',
-    UTI: 'com.adobe.pdf',
-    dialogTitle: r.title,
-  });
+  // Fallback: share the generated file as-is (random name, but always works).
+  await Sharing.shareAsync(printed.uri, options);
   return true;
+}
+
+function base64ToBytes(base64: string): Uint8Array {
+  const binary = atob(base64);
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+  return bytes;
 }
 
 // Opens the system print dialog (AirPrint on iPhone).
