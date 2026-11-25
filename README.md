@@ -534,9 +534,12 @@ Current status, as of this writing:
   - `--profile store`: name "My Cooking Base", bundle id
     `com.JHarvey.CookingBaseStore`. Only for a real App Store submission.
   - Bundle identifiers are permanent once Apple registers them.
-- **Config is ready; the first build hasn't been run.** Remaining one-time
-  steps: `eas init` (links the project and adds its id), then
-  `npm run build:uat:ios`.
+- **EAS project is linked** (`eas init` created it; id `ff92c210-b9af-4cef-9ccd-4e6ecd2f4d8c`).
+  Because `app.config.js` is a dynamic config, eas-cli can't write the id into
+  it, so it's set by hand under `extra.eas.projectId` — don't remove it. (If
+  `eas init` fails with "Cannot read properties of undefined (reading
+  'projectId')", that block is what's missing.) The first build hasn't been
+  run yet: `npm run build:uat:ios`.
 - **App icon:** the open-cookbook illustration (made in Canva). Everything in
   `assets/` is generated from one 1264 px source: `icon.png` is a 1024 px
   opaque square (iOS rounds the corners itself); the Android adaptive icon

@@ -20,6 +20,17 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "variant": "uat",
+      "router": {
+        "asyncRoutes": {
+          "web": true
+        }
+      },
+      "eas": {
+        "projectId": "ff92c210-b9af-4cef-9ccd-4e6ecd2f4d8c"
+      }
     }
   }
 }

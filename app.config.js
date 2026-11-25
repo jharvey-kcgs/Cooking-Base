@@ -39,6 +39,9 @@ module.exports = ({ config }) => ({
   },
   plugins: ['expo-router'],
   extra: {
+    ...config.extra,
     variant: IS_STORE ? 'store' : 'uat',
+    // Written by hand because eas-cli can't edit a dynamic app.config.js.
+    eas: { projectId: 'ff92c210-b9af-4cef-9ccd-4e6ecd2f4d8c' },
   },
 });
